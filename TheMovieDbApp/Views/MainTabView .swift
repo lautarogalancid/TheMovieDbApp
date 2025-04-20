@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftData
 
 enum AppTab {
     case home
@@ -61,7 +60,7 @@ struct MainTabView: View {
             }
             .tag(AppTab.watchlist)
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.dark) // TODO: Agregar app style extension o App?
         .tint(.blue)
     }
 }

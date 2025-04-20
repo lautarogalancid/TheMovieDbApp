@@ -10,16 +10,42 @@ struct MoviePosterView: View {
     let imageUrl: URL?
     let height: CGFloat
     let width: CGFloat
+    let cache: MovieCacheProtocol
+    
+    init(imageUrl: URL?,
+         height: CGFloat,
+         width: CGFloat,
+         cache: MovieCacheProtocol = MovieCache()) {
+        self.imageUrl = imageUrl
+        self.height = height
+        self.width = width
+        self.cache = cache
+        // TODO: Hace falta esto en structs?
+    }
     
     var body: some View {
-        AsyncImage(url: imageUrl) { image in image
+        if let url = imageUrl,
+           let data = cache.loadImage(for: url.absoluteString),
+           let image = UIImage(data: data) {
+            Image(uiImage: image)
                 .resizable()
                 .scaledToFill()
-        } placeholder: {
-            // TODO: Add static image
-            Color.purple
-        }.clipped()
-            .frame(width: width, height: height)
+                .frame(width: width, height: height)
+                .clipped()
+        } else {
+            AsyncImage(url: imageUrl) { status in
+                switch status {
+                case .success(let image):
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: width, height: height)
+                        .clipped()
+                default:
+                    Color.purple // TODO: Add placeholder asset img?
+                }
+            }
+        }
     }
 }
 

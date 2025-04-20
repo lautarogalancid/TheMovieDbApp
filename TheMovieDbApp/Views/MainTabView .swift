@@ -35,7 +35,8 @@ struct MainTabView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             NavigationStack {
-                HomeView(onSearchTap: {
+                HomeView(viewModel: HomeViewModel(),
+                         onSearchTap: {
                     selectedTab = .search
                 })
             }

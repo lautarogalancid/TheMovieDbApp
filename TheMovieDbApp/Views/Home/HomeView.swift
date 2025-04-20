@@ -9,9 +9,10 @@ import SwiftUICore
 import SwiftUI
 
 struct HomeView: View {
-    let onSearchTap: () -> Void
-    @State var selectedCategory: CategoriesTab = .nowPlaying
+    @StateObject var viewModel: HomeViewModel
+    @State var selectedCategory: Categories = .nowPlaying
     let columns: [GridItem] = Array(repeating: .init(.flexible(), spacing: 16), count: 3)
+    let onSearchTap: () -> Void
     
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
@@ -35,33 +36,42 @@ struct HomeView: View {
                     .cornerRadius(10)
                     .padding(.horizontal)
                 }
-                // TODO: Mover a view propia
+                // TODO: Mover a view propia?
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 16) {
-                        ForEach(1...5, id: \.self) { rank in
-                            TopMoviePosterView(imageUrl: nil, rank: rank, height: 210, width: 140)
+                        ForEach(Array(viewModel.popularMovies.enumerated()), id: \.1.id) { index, movie in
+                            TopMoviePosterView(imageUrl: movie.posterURL, rank: index + 1, height: 210, width: 140)
                         }
                     }
                     .padding(.horizontal)
                 }
                 .frame(height: 250)
                 CategoriesTabView(selected: $selectedCategory)
-                // TODO: Mover a view propia
+                // TODO: Mover a view propia?
                 LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(0..<6) { _ in
-                        MoviePosterView(imageUrl: nil, height: 145, width: 100)
+                    ForEach(viewModel.gridMovies) { movie in
+                        MoviePosterView(imageUrl: movie.posterURL, height: 145, width: 100)
                     }
                 }
                 .padding(.horizontal)
                 Spacer()
             }
+                   .task {
+                       await viewModel.loadPopularMovies()
+                       await viewModel.loadGridMovies(for: selectedCategory)
+                   }
+                   .onChange(of: selectedCategory) {
+                       Task {
+                           await viewModel.loadGridMovies(for: selectedCategory)
+                       }
+                   }
         }
         .padding(.bottom)
     }
 }
 
 #Preview {
-    HomeView(onSearchTap: {
+    HomeView(viewModel: HomeViewModel(), onSearchTap: {
         // nada
     }).preferredColorScheme(.dark)
 }

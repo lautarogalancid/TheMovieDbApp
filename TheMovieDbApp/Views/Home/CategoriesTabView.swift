@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftUICore
 
-enum CategoriesTab: String, CaseIterable, Identifiable {
+enum Categories: String, CaseIterable, Identifiable {
     case nowPlaying = "Now Playing"
     case upcoming = "Upcoming"
     case topRated = "Top Rated"
@@ -16,10 +16,10 @@ enum CategoriesTab: String, CaseIterable, Identifiable {
 }
 
 struct CategoriesTabView: View {
-    @Binding var selected: CategoriesTab
+    @Binding var selected: Categories
     var body: some View {
         HStack {
-            ForEach(CategoriesTab.allCases) { tab in
+            ForEach(Categories.allCases) { tab in
                 Button(action: {
                     selected = tab
                 }) {

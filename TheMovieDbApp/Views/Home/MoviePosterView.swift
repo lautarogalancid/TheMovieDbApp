@@ -12,8 +12,13 @@ struct MoviePosterView: View {
     let width: CGFloat
     
     var body: some View {
-        RoundedRectangle(cornerRadius: 8)
-            .fill(Color.green) // TODO: placeholder, show img
+        AsyncImage(url: imageUrl) { image in image
+                .resizable()
+                .scaledToFill()
+        } placeholder: {
+            // TODO: Add static image
+            Color.purple
+        }.clipped()
             .frame(width: width, height: height)
     }
 }

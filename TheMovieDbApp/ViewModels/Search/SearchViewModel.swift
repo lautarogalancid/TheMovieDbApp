@@ -26,6 +26,7 @@ final class SearchViewModel: ObservableObject {
             searchPerformed = false
             return
         }
+        self.searchPerformed = true
 
         do {
             // TODO: Add infinite scroll later
@@ -35,6 +36,5 @@ final class SearchViewModel: ObservableObject {
             // TODO: Handle errors properly
             self.movies = []
         }
-        self.searchPerformed = true
     }
 }

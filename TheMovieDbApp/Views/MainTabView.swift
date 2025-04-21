@@ -61,7 +61,7 @@ struct MainTabView: View {
             }
             .tag(AppTab.watchlist)
         }
-        .preferredColorScheme(.dark) // TODO: Agregar app style extension o App?
+        .preferredColorScheme(.dark) // TODO: Handle in app style extension
         .tint(.blue)
     }
 }

@@ -36,7 +36,7 @@ struct HomeView: View {
                     .cornerRadius(10)
                     .padding(.horizontal)
                 }
-                // TODO: Mover a view propia?
+                // TODO: Move into own view?
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 16) {
                         ForEach(Array(viewModel.popularMovies.enumerated()), id: \.1.id) { index, movie in
@@ -47,7 +47,7 @@ struct HomeView: View {
                 }
                 .frame(height: 250)
                 CategoriesTabView(selected: $selectedCategory)
-                // TODO: Mover a view propia?
+                // TODO: Move into own view?
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(viewModel.gridMovies) { movie in
                         MoviePosterView(imageUrl: movie.posterURL, height: 145, width: 100)

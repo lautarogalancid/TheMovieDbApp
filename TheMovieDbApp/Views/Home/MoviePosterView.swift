@@ -20,7 +20,6 @@ struct MoviePosterView: View {
         self.height = height
         self.width = width
         self.cache = cache
-        // TODO: Hace falta esto en structs?
     }
     
     var body: some View {
@@ -33,6 +32,7 @@ struct MoviePosterView: View {
                 .frame(width: width, height: height)
                 .clipped()
         } else {
+            // TODO: Remove img download, receive img downloaded alread
             AsyncImage(url: imageUrl) { status in
                 switch status {
                 case .success(let image):
@@ -47,8 +47,4 @@ struct MoviePosterView: View {
             }
         }
     }
-}
-
-#Preview {
-    MoviePosterView(imageUrl: nil, height: 210, width: 140)
 }

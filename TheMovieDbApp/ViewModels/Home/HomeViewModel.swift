@@ -28,7 +28,7 @@ class HomeViewModel: ObservableObject {
             let movies = try await service.fetchPopular()
             popularMovies = Array(movies.prefix(5))
         } catch {
-            // TODO: Hacer algo con el error
+            // TODO: Handle error
             errorMessage = error.localizedDescription
         }
     }

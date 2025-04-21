@@ -40,7 +40,13 @@ struct HomeView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 16) {
                         ForEach(Array(viewModel.popularMovies.enumerated()), id: \.1.id) { index, movie in
-                            TopMoviePosterView(imageUrl: movie.posterURL, rank: index + 1, height: 210, width: 140)
+                            Button {
+                                Task {
+                                    await viewModel.selectMovie(movie)
+                                }
+                            } label: {
+                                TopMoviePosterView(imageUrl: movie.posterURL, rank: index + 1, height: 210, width: 140)
+                            }.buttonStyle(.plain)
                         }
                     }
                     .padding(.horizontal)
@@ -50,7 +56,14 @@ struct HomeView: View {
                 // TODO: Move into own view?
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(viewModel.gridMovies) { movie in
-                        MoviePosterView(imageUrl: movie.posterURL, height: 145, width: 100)
+                        
+                        Button {
+                            Task {
+                                await viewModel.selectMovie(movie)
+                            }
+                        } label: {
+                            MoviePosterView(imageUrl: movie.posterURL, height: 145, width: 100)
+                        }.buttonStyle(.plain)
                     }
                 }
                 .padding(.horizontal)
@@ -67,6 +80,9 @@ struct HomeView: View {
                    }
         }
         .padding(.bottom)
+        .navigationDestination(item: $viewModel.selectedMovieDetails) { detail in
+            MovieDetailView(movie: detail)
+        }
     }
 }
 

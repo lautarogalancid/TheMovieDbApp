@@ -15,6 +15,7 @@ class HomeViewModel: ObservableObject {
     @Published var gridMovies: [Movie] = []
     @Published var isLoading: Bool = true
     @Published var errorMessage: String?
+    @Published var selectedMovieDetails: MovieDetail?
     
     private let service: MovieServiceProtocol
     
@@ -28,7 +29,7 @@ class HomeViewModel: ObservableObject {
             let movies = try await service.fetchPopular()
             popularMovies = Array(movies.prefix(5))
         } catch {
-            // TODO: Handle error
+            // TODO: Handle error, snack? alert?
             errorMessage = error.localizedDescription
         }
     }
@@ -50,6 +51,17 @@ class HomeViewModel: ObservableObject {
             gridMovies = Array(movies.prefix(6))
         }
         catch {
+            // TODO: Handle error, snack? alert?
+            errorMessage = error.localizedDescription
+        }
+    }
+    
+    func selectMovie(_ movie: Movie) async {
+        do {
+            let detail = try await service.fetchMovieDetails(id: movie.id)
+            selectedMovieDetails = detail
+        } catch {
+            // TODO: Handle error, snack? alert?
             errorMessage = error.localizedDescription
         }
     }

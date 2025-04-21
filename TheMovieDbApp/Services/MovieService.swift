@@ -11,6 +11,7 @@ protocol MovieServiceProtocol {
     func fetchNowPlaying() async throws -> [Movie]
     func fetchUpcoming() async throws -> [Movie]
     func fetchTopRated() async throws -> [Movie]
+    func fetchMovieDetails(id: Int) async throws -> MovieDetail
 }
 
 enum MovieEndpoints: String {
@@ -49,42 +50,38 @@ class MovieService: MovieServiceProtocol {
         try await fetchMovies(endpoint: MovieEndpoints.topRated.rawValue)
     }
     
-    // MARK: - Private
-    func fetchMovies(endpoint path: String) async throws -> [Movie] {
-        let urlString = "\(baseUrl)\(path)?api_key=\(publicApiKey)"
-        // print(urlString)
-        let cacheKey = path
+    func fetchMovieDetails(id: Int) async throws -> MovieDetail {
+        let urlString = "\(baseUrl)\(id)?api_key=\(publicApiKey)"
         
         guard let url = URL(string: urlString) else {
             throw URLError(.badURL)
         }
-        
-        var request = URLRequest(url: url)
-        request.timeoutInterval = 7
-        
+
         do {
-            let (data, response) = try await withThrowingTaskGroup(of: (Data, URLResponse).self) { group in
-                group.addTask {
-                    try await self.session.data(for: request)
-                }
-                group.addTask {
-                    try await Task.sleep(for: .seconds(5))
-                    throw URLError(.timedOut)
-                }
-                guard let result = try await group.next() else {
-                    throw URLError(.unknown)
-                }
-                
-                group.cancelAll()
-                return result
-            }
+            let data = try await fetchData(from: url)
+            let dto = try JSONDecoder().decode(MovieDetailDTO.self, from: data)
+            return dto.toDomain()
+        } catch {
+            throw error // TODO: Handle error? add cache to this? Makes sense?
+        }
+    }
+
+    // MARK: - Private
+    private func fetchMovies(endpoint path: String) async throws -> [Movie] {
+        let urlString = "\(baseUrl)\(path)?api_key=\(publicApiKey)"
+        let cacheKey = path
+
+        guard let url = URL(string: urlString) else {
+            throw URLError(.badURL)
+        }
+
+        do {
+            let data = try await fetchData(from: url)
             let decoded = try JSONDecoder().decode(MovieListResponse.self, from: data)
-            let movies = decoded.results.map {
-                $0.toDomain()
-            }
-            
+            let movies = decoded.results.map { $0.toDomain() }
+
             cache.saveMovies(movies, for: cacheKey)
-            
+
             for movie in movies {
                 if let url = movie.posterURL,
                    cache.loadImage(for: url.absoluteString) == nil {
@@ -92,21 +89,49 @@ class MovieService: MovieServiceProtocol {
                         let (imageData, _) = try await session.data(from: url)
                         cache.saveImage(imageData, for: url.absoluteString)
                     } catch {
-                        // TODO: Handle errors?
                         continue
                     }
                 }
             }
-            
+
             return movies
-            
+
         } catch {
-            if let cachedResponse = cache.loadMovies(for: cacheKey) {
-                return cachedResponse
+            if let cached = cache.loadMovies(for: cacheKey) {
+                return cached
             } else {
                 throw error
             }
         }
+    }
+
+    private func fetchData(from url: URL) async throws -> Data {
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 7
+        
+        let (data, response) = try await withThrowingTaskGroup(of: (Data, URLResponse).self) { group in
+            group.addTask {
+                try await self.session.data(for: request)
+            }
+            group.addTask {
+                try await Task.sleep(for: .seconds(5))
+                throw URLError(.timedOut)
+            }
+            
+            guard let result = try await group.next() else {
+                throw URLError(.unknown)
+            }
+            
+            group.cancelAll()
+            return result
+        }
+        
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200..<300).contains(httpResponse.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        
+        return data
     }
 }
 

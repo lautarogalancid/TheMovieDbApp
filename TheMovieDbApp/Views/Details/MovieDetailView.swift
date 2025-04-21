@@ -6,6 +6,7 @@
 //
 import SwiftUI
 
+// TODO: Add View Model to handle logic
 struct MovieDetailView: View {
     let movie: MovieDetail
 

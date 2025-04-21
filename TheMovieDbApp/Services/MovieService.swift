@@ -11,22 +11,25 @@ protocol MovieServiceProtocol {
     func fetchNowPlaying() async throws -> [Movie]
     func fetchUpcoming() async throws -> [Movie]
     func fetchTopRated() async throws -> [Movie]
+    // SMELL: Interface segregation? Maybe split service into service per view (home, search, detail) if it grows too much.
     func fetchMovieDetails(id: Int) async throws -> MovieDetail
+    func searchMovies(query: String, page: Int) async throws -> [SearchResultMovie]
 }
 
 enum MovieEndpoints: String {
-    case popular = "popular"
-    case nowPlaying = "now_playing"
-    case upcoming = "upcoming"
-    case topRated = "top_rated"
+    case popular = "movie/popular"
+    case nowPlaying = "movie/now_playing"
+    case upcoming = "movie/upcoming"
+    case topRated = "movie/top_rated"
+    case details = "movie"
+    case search = "search/movie"
 }
 
 class MovieService: MovieServiceProtocol {
     private let publicApiKey = "1fec327a16dfa43c4d0c3c78cd7d8c4d" // TODO: Define better placement for api key
     private let session: URLSession
     private let cache: MovieCacheProtocol
-    private let baseUrl = "https://api.themoviedb.org/3/movie/"
-    private let nowPlayingPath = "movie/now_playing"
+    private let baseUrl = "https://api.themoviedb.org/3/"
     
     init(session: URLSession = .shared, cache: MovieCacheProtocol = MovieCache()) {
         self.session = session
@@ -51,8 +54,8 @@ class MovieService: MovieServiceProtocol {
     }
     
     func fetchMovieDetails(id: Int) async throws -> MovieDetail {
-        let urlString = "\(baseUrl)\(id)?api_key=\(publicApiKey)"
-        
+        let urlString = "\(baseUrl)\(MovieEndpoints.details.rawValue)/\(id)?api_key=\(publicApiKey)"
+    
         guard let url = URL(string: urlString) else {
             throw URLError(.badURL)
         }
@@ -64,6 +67,22 @@ class MovieService: MovieServiceProtocol {
         } catch {
             throw error // TODO: Handle error? add cache to this? Makes sense?
         }
+    }
+    
+    func searchMovies(query: String, page: Int = 1) async throws -> [SearchResultMovie] {
+        guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+            throw URLError(.badURL)
+        }
+        
+        let urlString = "\(baseUrl)\(MovieEndpoints.search.rawValue)?api_key=\(publicApiKey)&query=\(encodedQuery)&page=\(page)"
+
+        guard let url = URL(string: urlString) else {
+            throw URLError(.badURL)
+        }
+        
+        let data = try await fetchData(from: url)
+        let decoded = try JSONDecoder().decode(SearchResponse.self, from: data)
+        return decoded.results.map { $0.toDomain() }
     }
 
     // MARK: - Private

@@ -14,6 +14,7 @@ struct BackdropWithScoreView: View {
 
     var body: some View {
         ZStack {
+            // TODO: Receive image instead of url?
             AsyncImage(url: backdropURL) { phase in
                 switch phase {
                 case .success(let image):

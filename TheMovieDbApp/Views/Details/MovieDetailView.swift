@@ -52,21 +52,35 @@ struct MovieDetailView: View {
             }
             //.padding(.top)
         }
-        .background(Color.black)
-        .foregroundColor(.white)
+        .navigationTitle("Detail")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(action: {
+                    // TODO: Add to watch list
+                }) {
+                    Image(systemName: "bookmark")
+                }
+            }
+            
+        }
     }
 }
 
 #Preview {
-    MovieDetailView(movie: MovieDetail(
-        id: 1,
-        title: "Finding Nemo: Final Adventures DVD Whatever",
-        overview: "Nemo, an adventurous young clownfish, is unexpectedly taken...",
-        posterPath: "/eHuGQ10FUzK1mdOY69wF5pGgEf5.jpg",
-        backdropPath: "/eCynaAOgYYiw5yN5lBwz3IxqvaW.jpg",
-        releaseDate: "2003-05-30",
-        runtime: 100,
-        voteAverage: 7.8,
-        genres: ["Animation", "Family"]
-    ))
+    NavigationStack {
+        MovieDetailView(movie: MovieDetail(
+            id: 1,
+            title: "Finding Nemo: Final Adventures DVD Whatever",
+            overview: "Nemo, an adventurous young clownfish, is unexpectedly taken...",
+            posterPath: "/eHuGQ10FUzK1mdOY69wF5pGgEf5.jpg",
+            backdropPath: "/eCynaAOgYYiw5yN5lBwz3IxqvaW.jpg",
+            releaseDate: "2003-05-30",
+            runtime: 100,
+            voteAverage: 7.8,
+            genres: ["Animation", "Family"]
+        ))
+        .preferredColorScheme(.dark) // TODO: Handle in app style extension
+        .tint(.blue)
+    }
 }

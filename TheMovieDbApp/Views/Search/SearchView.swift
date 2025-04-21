@@ -29,4 +29,6 @@ struct SearchView: View {
 
 #Preview {
     SearchView()
+        .preferredColorScheme(.dark) // TODO: Handle in app style extension
+        .tint(.blue)
 }

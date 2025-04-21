@@ -14,6 +14,4 @@ The biggest ones i can think of now:
 For persistence i did advance creating a swift data repository. I finished the behavior, i only had to connect it to the Detail View, and create a View model to communicate the view with the repo.
 For the trailer player, i had to add a new request for the video endpoint in the service (fetchTrailer) to get the video key, add the dto and model, perform the fetch right after we fetch the details
 From what i saw there's a few video services the trailer can come from, for an MVP i'd support Youtube app only, and add a deeplink when you press the play button to open the youtube app, otherwise, open the link in safari.
-
-
-
+The design system isn't an exact match to figma, i used a global dark theme and native components, so there's quite a few things to polish, but it'd be good to add a design system with colors, fonts, assets.
